@@ -7,11 +7,13 @@ VideoItem::VideoItem(QWidget *parent)
 
 }
 
+//获取得到的图片进行绘图
 void VideoItem::slot_setImage(const QImage  image)
 {
     m_image = image;
-    this->repaint();//立即刷新绘图
+    this->update();//立即刷新绘图
 }
+
 //绘图事件
 void VideoItem::paintEvent(QPaintEvent *event)
 {

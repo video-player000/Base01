@@ -1,9 +1,9 @@
 #include "videoplayerdemo.h"
-#include "ui_videoplayerdemo.h"
+#include "ui_videoplayer.h"
 
 VideoPlayerDemo::VideoPlayerDemo(QWidget *parent)
     : QWidget(parent)
-    , ui(new Ui::VideoPlayerDemo)
+    , ui(new Ui::VideoPlayer)
 {
     ui->setupUi(this);
 }
