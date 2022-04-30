@@ -14,6 +14,7 @@ extern "C" {
 #include "libavutil/imgutils.h"
 #include "libavutil/frame.h"
 #include "libavutil/mem.h"
+#include "libavutil/time.h"//获取时间基函数的头文件
 }
 
 //开启线程进行解码

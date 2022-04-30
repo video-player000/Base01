@@ -6,8 +6,8 @@ using namespace std;
 //构造函数 获取文件路径
 VideoShow::VideoShow()
 {
-    //m_fileName = "./media/222.mp4";
-     m_fileName = "H://Project//media//media-file//bb.mp4";
+    m_fileName = "./media/222.mp4";
+     //m_fileName = "H://Project//media//media-file//aaa.mp4";
 
 }
 
@@ -118,11 +118,21 @@ void VideoShow::run()
     av_dump_format(pFormatCtx, 0, file_path, 0); //输出视频信息
 
 //8.循环读取视频帧, 转换为 RGB 格式, 抛出信号去控件显示
+    //以微妙为单位记录时间
+    int64_t start_time =av_gettime();
+    int64_t pts_us = 0;
     while (1)
     {
         if (av_read_frame(pFormatCtx, packet) < 0)
         {
             break; //视频全部读完了
+        }
+        //计算实际时间，比较显示时间与已播放时间戳，做出同步
+        int64_t realTime =av_gettime()-start_time;//实际播放时间
+        while(pts_us>realTime)
+        {
+            msleep(5);
+            realTime = av_gettime()-start_time;
         }
         if (packet->stream_index == videoStream)
         {
@@ -132,12 +142,18 @@ void VideoShow::run()
                 qDebug()<<"send_packet error";
                 return;
             }
-            if (avcodec_receive_frame(pCodecCtx, packet) != 0) {
+            if (avcodec_receive_frame(pCodecCtx, pFrame) != 0) {
                 //若为0则成功，a frame was returned
                 qDebug()<<"receive_frame error";
                 return;
             }
             else{
+             //PTS与DTS——显示时间戳与解码时间戳
+             //pts *av_q2d(time_base)计算得到的单位是 秒 乘以1000000得到的微妙单位，为了与avgettime的时间比较
+             //时间戳值乘以时间基=实际的时刻值(秒单位)
+
+                //显示的时刻
+                pts_us=1000000 * pFrame->pts *av_q2d(pFormatCtx->streams[videoStream]->time_base);//绝对时间
                 //获取解码的帧数据
                 //YUV420转换RGB
                 sws_scale(img_convert_ctx,
@@ -156,7 +172,7 @@ void VideoShow::run()
 
         //清理AVPacket中的所有空间数据
         av_packet_unref(packet);
-        msleep(6); // 停一停,关系到播放速度
+        //msleep(6); // 停一停,关系到播放速度
     }
 
     //析构
